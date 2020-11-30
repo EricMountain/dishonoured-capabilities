@@ -59,6 +59,13 @@ usermod --append -G docker vagrant
 
 # Build image without user-namespaces
 rm -f /etc/docker/daemon.json 2> /dev/null
+cat - <<EOF > /etc/docker/daemon.json
+{
+  "features": {
+    "buildkit": true
+  }
+}
+EOF
 systemctl reset-failed docker
 systemctl restart docker
 
@@ -69,7 +76,10 @@ sudo -i -u vagrant docker build --no-cache -t capabilities-built-with-no-userns:
 # Build image with user namespaces
 cat - <<EOF > /etc/docker/daemon.json
 {
-  "userns-remap": "default"
+  "userns-remap": "default",
+  "features": {
+    "buildkit": true
+  }
 }
 EOF
 
