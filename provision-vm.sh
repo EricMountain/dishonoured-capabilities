@@ -52,7 +52,8 @@ else
 fi
 
 systemctl daemon-reload
-systemctl start docker
+systemctl reset-failed docker
+systemctl restart docker
 
 # Grant vagrant access to the docker socket
 usermod --append -G docker vagrant
@@ -83,6 +84,7 @@ cat - <<EOF > /etc/docker/daemon.json
 }
 EOF
 
+systemctl reset-failed docker
 systemctl restart docker
 
 docker info
