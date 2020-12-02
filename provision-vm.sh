@@ -11,7 +11,10 @@ apt-get install -y \
     ca-certificates \
     curl \
     gnupg-agent \
-    software-properties-common
+    software-properties-common \
+    make
+
+sudo -i -u vagrant git clone https://github.com/EricMountain/moby
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
@@ -57,39 +60,39 @@ systemctl start docker
 # Grant vagrant access to the docker socket
 usermod --append -G docker vagrant
 
-# Build image without user-namespaces
-rm -f /etc/docker/daemon.json 2> /dev/null
-systemctl reset-failed docker
-systemctl restart docker
+# # Build image without user-namespaces
+# rm -f /etc/docker/daemon.json 2> /dev/null
+# systemctl reset-failed docker
+# systemctl restart docker
 
-docker info
+# docker info
 
-sudo -i -u vagrant docker build --no-cache -t capabilities-built-with-no-userns:1.0 ~vagrant
+# sudo -i -u vagrant docker build --no-cache -t capabilities-built-with-no-userns:1.0 ~vagrant
 
-# Build image with user namespaces
-cat - <<EOF > /etc/docker/daemon.json
-{
-  "userns-remap": "default"
-}
-EOF
+# # Build image with user namespaces
+# cat - <<EOF > /etc/docker/daemon.json
+# {
+#   "userns-remap": "default"
+# }
+# EOF
 
-systemctl restart docker
+# systemctl restart docker
 
-docker info
+# docker info
 
-sudo -i -u vagrant docker build --no-cache -t capabilities-built-with-userns:1.0 ~vagrant
-docker save capabilities-built-with-userns:1.0 > /tmp/capabilities-built-with-userns-1.0.tar
+# sudo -i -u vagrant docker build --no-cache -t capabilities-built-with-userns:1.0 ~vagrant
+# docker save capabilities-built-with-userns:1.0 > /tmp/capabilities-built-with-userns-1.0.tar
 
-# Now run both images in a no-user-ns setup
+# # Now run both images in a no-user-ns setup
 
-rm -f /etc/docker/daemon.json 2> /dev/null
-systemctl reset-failed docker
-systemctl restart docker
+# rm -f /etc/docker/daemon.json 2> /dev/null
+# systemctl reset-failed docker
+# systemctl restart docker
 
-docker load < /tmp/capabilities-built-with-userns-1.0.tar
+# docker load < /tmp/capabilities-built-with-userns-1.0.tar
 
-docker info
-docker images
+# docker info
+# docker images
 
-docker run --rm capabilities-built-with-no-userns:1.0 /bin/bash -c '(/usr/local/bin/sleep-test infinity & ); sleep 1; grep Cap /proc/$(pgrep sleep-test)/status'
-docker run --rm capabilities-built-with-userns:1.0 /bin/bash -c '(/usr/local/bin/sleep-test infinity & ); sleep 1; grep Cap /proc/$(pgrep sleep-test)/status'
+# docker run --rm capabilities-built-with-no-userns:1.0 /bin/bash -c '(/usr/local/bin/sleep-test infinity & ); sleep 1; grep Cap /proc/$(pgrep sleep-test)/status'
+# docker run --rm capabilities-built-with-userns:1.0 /bin/bash -c '(/usr/local/bin/sleep-test infinity & ); sleep 1; grep Cap /proc/$(pgrep sleep-test)/status'
