@@ -5,7 +5,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider "virtualbox" do |v|
-        v.memory = 2048
+        v.memory = 3072
         v.cpus = 4
     end
     config.vm.box = "ubuntu/focal64"
